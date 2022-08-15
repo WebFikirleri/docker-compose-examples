@@ -1,0 +1,26 @@
+version: '3.5'
+services:
+  www:
+    image: php:8.1-apache-buster
+    container_name: www
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - './www:/var/www/html'
+# single line example
+    command: bash -c "apt-get -y update && apt-get -y install libicu-dev && docker-php-ext-configure intl && docker-php-ext-install intl && docker-php-ext-install mysqli && apache2-foreground"
+# multiline example
+    command: >
+      bash -c 
+      "apt-get -y update && 
+      apt-get -y install libicu-dev && 
+      docker-php-ext-configure intl && 
+      docker-php-ext-install intl && 
+      docker-php-ext-install mysqli && 
+      apache2-foreground"
+# you have to add default run command at the end of the command.
+# apache server default command is "apache2-foreground"
+# if you don't need to use bash commands remove bash -c command and quotes.
+# bash access example: 'bash -c "ls"'
