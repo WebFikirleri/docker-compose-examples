@@ -1,0 +1,51 @@
+version: '3.5'
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=no
+      - MARIADB_USER=username
+      - MARIADB_PASSWORD=password
+      - MARIADB_ROOT_PASSWORD=rootpassword
+      - MARIADB_DATABASE=databasename
+    ports:
+      - '3309:3309'
+    volumes:
+      - './data:/var/lib/mysql'
+    
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: always
+    environment:
+      - PMA_HOST=mariadb
+      - UPLOAD_LIMIT=204800000
+      - MAX_EXECUTION_TIME=1200
+    ports:
+      - '8090:80'
+    depends_on:
+      - mariadb
+      
+  www:
+    image: php:8.1-apache-buster
+    container_name: www
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - './www:/var/www/html'
+    depends_on:
+      - mariadb
+    links:
+      - mariadb
+    command: >
+      bash -c 
+      "apt-get -y update && 
+      apt-get -y install libicu-dev && 
+      docker-php-ext-configure intl && 
+      docker-php-ext-install intl && 
+      docker-php-ext-install mysqli && 
+      apache2-foreground"
